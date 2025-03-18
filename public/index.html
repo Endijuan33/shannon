@@ -131,7 +131,7 @@
   <div class="container">
     <!-- Faucet Balance displayed at top left -->
     <div class="balance-container" id="faucetBalance">Loading...</div>
-    
+
     <h1>Somnia Testnet Faucet</h1>
     <p>Enter your wallet address below, complete the captcha challenge, and claim 0.25 STT.</p>
     <form id="claimForm">
@@ -153,7 +153,7 @@
       </p>
       <p>If you wish to donate or return tokens, please use the above address.</p>
     </div>
-    
+
     <!-- Credits section -->
     <div class="credits">
       <p>Built with love❤️ for Somnia Network.</p>
@@ -186,7 +186,14 @@
     async function updateFaucetBalance() {
       try {
         const res = await fetch("/balance");
-        const data = await res.json();
+        const contentType = res.headers.get("content-type") || "";
+        let data;
+        if (contentType.includes("application/json")) {
+          data = await res.json();
+        } else {
+          const text = await res.text();
+          throw new Error("Unexpected response format: " + text);
+        }
         if (data.balance !== undefined) {
           document.getElementById("faucetBalance").innerText = "Faucet Balance: " + data.balance + " STT";
         } else {
@@ -213,7 +220,14 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ address, captchaToken })
         });
-        const data = await res.json();
+        const contentType = res.headers.get("content-type") || "";
+        let data;
+        if (contentType.includes("application/json")) {
+          data = await res.json();
+        } else {
+          const text = await res.text();
+          throw new Error("Unexpected response format: " + text);
+        }
 
         if (data.error) {
           let message = `Error: ${data.error}`;
