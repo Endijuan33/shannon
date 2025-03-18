@@ -1,28 +1,92 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Somnia Testnet Faucet</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 500px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    p {
+      text-align: center;
+      color: #666;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #007bff;
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #result {
+      margin-top: 20px;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+  <!-- Load Cloudflare Turnstile script -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
-  <h1>Somnia Testnet Faucet</h1>
-  <form id="claimForm">
-    <input type="text" id="address" placeholder="Enter your wallet address" required>
-    <button type="submit">Claim 0.25 STT</button>
-  </form>
-  <div id="result"></div>
+  <div class="container">
+    <h1>Somnia Testnet Faucet</h1>
+    <p>Enter your wallet address below, complete the captcha challenge, and claim 0.25 STT.</p>
+    <form id="claimForm">
+      <input type="text" id="address" placeholder="Enter your wallet address" required>
+      <!-- Cloudflare Turnstile widget with your Site Key -->
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAABBZjg3H815GxZJT" data-callback="onCaptchaCompleted"></div>
+      <!-- Hidden field to store the captcha token -->
+      <input type="hidden" id="captchaToken" name="captchaToken">
+      <button type="submit">Claim 0.25 STT</button>
+    </form>
+    <div id="result"></div>
+  </div>
 
   <script>
+    function onCaptchaCompleted(token) {
+      document.getElementById("captchaToken").value = token;
+    }
+
     document.getElementById("claimForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const address = document.getElementById("address").value;
+      const captchaToken = document.getElementById("captchaToken").value;
       const resultDiv = document.getElementById("result");
       resultDiv.innerText = "Processing claim...";
       try {
         const res = await fetch("/.netlify/functions/faucet", {
           method: "POST",
-          body: JSON.stringify({ address }),
-          headers: { "Content-Type": "application/json" }
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ address, captchaToken })
         });
         const data = await res.json();
         resultDiv.innerText = data.message ? data.message : JSON.stringify(data);

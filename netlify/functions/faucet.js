@@ -8,8 +8,28 @@ const NETWORKS = [
   { name: 'Linea', rpc: process.env.LINEA_RPC_URL },
 ];
 
-const walletCooldownData = {}; // Format: { "walletAddress": timestamp }
-const ipCooldownData = {};     // Format: { "ipAddress": timestamp }
+const walletCooldownData = {};
+const ipCooldownData = {};
+
+async function verifyCaptcha(captchaToken, remoteIp) {
+  const secret = process.env.CF_CAPTCHA_SECRET;
+  if (!captchaToken) {
+    throw new Error("Missing captcha token");
+  }
+  const formData = new URLSearchParams();
+  formData.append("secret", secret);
+  formData.append("response", captchaToken);
+  if (remoteIp) {
+    formData.append("remoteip", remoteIp);
+  }
+  const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: formData.toString()
+  });
+  const data = await response.json();
+  return data.success;
+}
 
 async function isActiveAddress(address) {
   for (const net of NETWORKS) {
@@ -51,15 +71,28 @@ exports.handler = async (event, context) => {
     return { statusCode: 400, body: "Invalid JSON" };
   }
 
-  const { address } = body;
+  const { address, captchaToken } = body;
   if (!address || !ethers.utils.isAddress(address)) {
     return { statusCode: 400, body: "Invalid wallet address" };
+  }
+  if (!captchaToken) {
+    return { statusCode: 400, body: "Captcha token is required" };
   }
 
   const ipHeader = event.headers["x-forwarded-for"] || event.headers["client-ip"] || "";
   const ip = ipHeader.split(",")[0].trim();
   if (!ip) {
     return { statusCode: 400, body: "IP address not detected" };
+  }
+
+  try {
+    const captchaSuccess = await verifyCaptcha(captchaToken, ip);
+    if (!captchaSuccess) {
+      return { statusCode: 403, body: "Captcha verification failed" };
+    }
+  } catch (error) {
+    console.error("Captcha verification error:", error);
+    return { statusCode: 500, body: "Error verifying captcha" };
   }
 
   if (ipCooldownData[ip]) {
@@ -77,7 +110,6 @@ exports.handler = async (event, context) => {
   } catch (error) {
     return { statusCode: 500, body: "Failed to check wallet activity" };
   }
-  
   if (!active) {
     return { statusCode: 403, body: "Wallet is not active on the required networks" };
   }
