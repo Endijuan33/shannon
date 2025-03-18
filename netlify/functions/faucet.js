@@ -63,6 +63,7 @@ exports.handler = async (event, context) => {
   if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ error: "Method Not Allowed" })
     };
   }
@@ -73,6 +74,7 @@ exports.handler = async (event, context) => {
   } catch (error) {
     return {
       statusCode: 400,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ error: "Invalid JSON", details: error.message })
     };
   }
@@ -81,12 +83,14 @@ exports.handler = async (event, context) => {
   if (!address || !ethers.utils.isAddress(address)) {
     return {
       statusCode: 400,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ error: "Invalid wallet address" })
     };
   }
   if (!captchaToken) {
     return {
       statusCode: 400,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ error: "Captcha token is required" })
     };
   }
@@ -96,6 +100,7 @@ exports.handler = async (event, context) => {
   if (!ip) {
     return {
       statusCode: 400,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ error: "IP address not detected" })
     };
   }
@@ -105,6 +110,7 @@ exports.handler = async (event, context) => {
     if (!captchaSuccess) {
       return {
         statusCode: 403,
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           error: "Captcha verification failed",
           details: "Please complete the captcha again."
@@ -115,6 +121,7 @@ exports.handler = async (event, context) => {
     console.error("Captcha verification error:", error);
     return {
       statusCode: 500,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         error: "Error verifying captcha",
         details: error.message
@@ -125,6 +132,7 @@ exports.handler = async (event, context) => {
   if (ipCooldownData[ip]) {
     return {
       statusCode: 429,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         error: "Faucet has already been claimed from this IP",
         details: "Only one claim per IP is allowed."
@@ -136,6 +144,7 @@ exports.handler = async (event, context) => {
   if (walletCooldownData[address] && now - walletCooldownData[address] < 86400) {
     return {
       statusCode: 429,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         error: "You have already claimed within the last 24 hours",
         details: "Wait until 24 hours pass since your last claim."
@@ -149,6 +158,7 @@ exports.handler = async (event, context) => {
   } catch (error) {
     return {
       statusCode: 500,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         error: "Failed to check wallet activity",
         details: error.message
@@ -158,6 +168,7 @@ exports.handler = async (event, context) => {
   if (!active) {
     return {
       statusCode: 403,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         error: "Wallet is not active on the required networks",
         details: "Make at least one transaction on Ethereum, Base, Polygon, Arbitrum, or Linea."
@@ -171,6 +182,7 @@ exports.handler = async (event, context) => {
     ipCooldownData[ip] = now;
     return {
       statusCode: 200,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         message: "Claim successful. 0.25 STT has been sent.",
         txHash: txHash
@@ -180,6 +192,7 @@ exports.handler = async (event, context) => {
     console.error("Error sending STT:", error);
     return {
       statusCode: 500,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         error: "Failed to send token",
         details: error.message

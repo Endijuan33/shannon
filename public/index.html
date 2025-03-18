@@ -29,17 +29,16 @@
       color: #666;
     }
     .balance-container {
-      position: absolute;
-      top: 20px;
-      left: 20px;
       background: #007bff;
       color: white;
       padding: 5px 10px;
       border-radius: 4px;
       font-size: 14px;
+      display: inline-block;
+      margin-bottom: 10px;
     }
     form {
-      margin-top: 60px; /* Give some space for the balance display */
+      margin-top: 20px;
     }
     input[type="text"] {
       width: 100%;
@@ -129,19 +128,19 @@
 </head>
 <body>
   <div class="container">
-    <!-- Faucet Balance displayed at top left -->
-    <div class="balance-container" id="faucetBalance">Loading...</div>
-
     <h1>Somnia Testnet Faucet</h1>
     <p>Enter your wallet address below, complete the captcha challenge, and claim 0.25 STT.</p>
+
+    <!-- Faucet balance displayed above the address input -->
     <form id="claimForm">
+      <div class="balance-container" id="faucetBalance">Loading...</div>
+
       <input type="text" id="address" placeholder="Enter your wallet address" required>
-      <!-- Cloudflare Turnstile widget with your Site Key -->
       <div class="cf-turnstile" data-sitekey="0x4AAAAAABBZjg3H815GxZJT" data-callback="onCaptchaCompleted"></div>
-      <!-- Hidden field to store the captcha token -->
       <input type="hidden" id="captchaToken" name="captchaToken">
       <button type="submit">Claim 0.25 STT</button>
     </form>
+
     <div id="result"></div>
 
     <!-- Informational section -->
@@ -185,7 +184,6 @@
 
     async function updateFaucetBalance() {
       try {
-        // Call the Netlify function "balance" endpoint
         const res = await fetch("/.netlify/functions/balance");
         const contentType = res.headers.get("content-type") || "";
         let data;
@@ -215,6 +213,7 @@
       resultDiv.innerText = "Processing claim...";
 
       try {
+        // Call the Netlify function "faucet"
         const res = await fetch("/.netlify/functions/faucet", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

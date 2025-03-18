@@ -9,13 +9,22 @@ exports.handler = async (event, context) => {
 
     return {
       statusCode: 200,
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({ balance })
     };
   } catch (err) {
     console.error("Error fetching faucet balance:", err);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Failed to retrieve balance", details: err.message })
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        error: "Failed to retrieve balance",
+        details: err.message
+      })
     };
   }
 };
