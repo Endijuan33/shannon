@@ -53,6 +53,62 @@
       text-align: center;
       font-weight: bold;
     }
+    .info {
+      margin-top: 30px;
+      padding: 15px;
+      background: #e9ecef;
+      border-left: 4px solid #007bff;
+      font-size: 14px;
+      color: #333;
+    }
+    .donation {
+      margin-top: 10px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .donation span {
+      word-break: break-all;
+    }
+    .copy-btn {
+      background: #007bff;
+      border: none;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .copy-btn:hover {
+      background: #0056b3;
+    }
+    .credits {
+      margin-top: 30px;
+      padding: 15px;
+      text-align: center;
+      font-size: 14px;
+      color: #333;
+      border-top: 1px solid #ccc;
+    }
+    .credits p {
+      margin: 10px 0;
+    }
+    .social {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    .social a {
+      display: inline-block;
+    }
+    .social img {
+      width: 32px;
+      height: 32px;
+    }
   </style>
   <!-- Load Cloudflare Turnstile script -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
@@ -70,11 +126,44 @@
       <button type="submit">Claim 0.25 STT</button>
     </form>
     <div id="result"></div>
+
+    <!-- Informational section -->
+    <div class="info">
+      <p><strong>Disclaimer:</strong> This faucet is for testing purposes only. The tokens provided here have no real monetary value.</p>
+      <p class="donation">
+        <span id="donationAddress">0x7017Ca7EcA89dA93eb2D191Ee3996Bec3cB1c1f6</span>
+        <button class="copy-btn" onclick="copyDonationAddress()">Copy</button>
+      </p>
+      <p>If you wish to donate or return tokens, please use the above address.</p>
+    </div>
+
+    <!-- Credits section -->
+    <div class="credits">
+      <p>Built with love for Somnia Network</p>
+      <div class="social">
+        <a href="https://github.com/Endijuan33" target="_blank">
+          <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub">
+        </a>
+        <a href="https://t.me/e0303" target="_blank">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram">
+        </a>
+      </div>
+    </div>
   </div>
 
   <script>
     function onCaptchaCompleted(token) {
       document.getElementById("captchaToken").value = token;
+    }
+
+    async function copyDonationAddress() {
+      const address = document.getElementById("donationAddress").innerText;
+      try {
+        await navigator.clipboard.writeText(address);
+        alert("Donation address copied!");
+      } catch (err) {
+        alert("Failed to copy donation address.");
+      }
     }
 
     document.getElementById("claimForm").addEventListener("submit", async (e) => {
