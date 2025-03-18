@@ -61,57 +61,108 @@ async function sendSTT(toAddress) {
 
 exports.handler = async (event, context) => {
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method Not Allowed" };
+    return {
+      statusCode: 405,
+      body: JSON.stringify({ error: "Method Not Allowed" })
+    };
   }
 
   let body;
   try {
     body = JSON.parse(event.body);
   } catch (error) {
-    return { statusCode: 400, body: "Invalid JSON" };
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Invalid JSON", details: error.message })
+    };
   }
 
   const { address, captchaToken } = body;
   if (!address || !ethers.utils.isAddress(address)) {
-    return { statusCode: 400, body: "Invalid wallet address" };
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Invalid wallet address" })
+    };
   }
   if (!captchaToken) {
-    return { statusCode: 400, body: "Captcha token is required" };
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Captcha token is required" })
+    };
   }
 
   const ipHeader = event.headers["x-forwarded-for"] || event.headers["client-ip"] || "";
   const ip = ipHeader.split(",")[0].trim();
   if (!ip) {
-    return { statusCode: 400, body: "IP address not detected" };
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "IP address not detected" })
+    };
   }
 
   try {
     const captchaSuccess = await verifyCaptcha(captchaToken, ip);
     if (!captchaSuccess) {
-      return { statusCode: 403, body: "Captcha verification failed" };
+      return {
+        statusCode: 403,
+        body: JSON.stringify({
+          error: "Captcha verification failed",
+          details: "Please complete the captcha again."
+        })
+      };
     }
   } catch (error) {
     console.error("Captcha verification error:", error);
-    return { statusCode: 500, body: "Error verifying captcha" };
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: "Error verifying captcha",
+        details: error.message
+      })
+    };
   }
 
   if (ipCooldownData[ip]) {
-    return { statusCode: 429, body: "Faucet has already been claimed from this IP" };
+    return {
+      statusCode: 429,
+      body: JSON.stringify({
+        error: "Faucet has already been claimed from this IP",
+        details: "Only one claim per IP is allowed."
+      })
+    };
   }
 
   const now = Math.floor(Date.now() / 1000);
   if (walletCooldownData[address] && now - walletCooldownData[address] < 86400) {
-    return { statusCode: 429, body: "You have already claimed within the last 24 hours" };
+    return {
+      statusCode: 429,
+      body: JSON.stringify({
+        error: "You have already claimed within the last 24 hours",
+        details: "Wait until 24 hours pass since your last claim."
+      })
+    };
   }
 
   let active = false;
   try {
     active = await isActiveAddress(address);
   } catch (error) {
-    return { statusCode: 500, body: "Failed to check wallet activity" };
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: "Failed to check wallet activity",
+        details: error.message
+      })
+    };
   }
   if (!active) {
-    return { statusCode: 403, body: "Wallet is not active on the required networks" };
+    return {
+      statusCode: 403,
+      body: JSON.stringify({
+        error: "Wallet is not active on the required networks",
+        details: "Make at least one transaction on Ethereum, Base, Polygon, Arbitrum, or Linea."
+      })
+    };
   }
 
   try {
@@ -127,6 +178,12 @@ exports.handler = async (event, context) => {
     };
   } catch (error) {
     console.error("Error sending STT:", error);
-    return { statusCode: 500, body: "Failed to send token" };
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: "Failed to send token",
+        details: error.message
+      })
+    };
   }
 };

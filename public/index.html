@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -82,6 +83,7 @@
       const captchaToken = document.getElementById("captchaToken").value;
       const resultDiv = document.getElementById("result");
       resultDiv.innerText = "Processing claim...";
+
       try {
         const res = await fetch("/.netlify/functions/faucet", {
           method: "POST",
@@ -89,9 +91,27 @@
           body: JSON.stringify({ address, captchaToken })
         });
         const data = await res.json();
-        resultDiv.innerText = data.message ? data.message : JSON.stringify(data);
+
+        if (data.error) {
+          // Show error message (and optionally details if present)
+          let message = `Error: ${data.error}`;
+          if (data.details) {
+            message += `\nDetails: ${data.details}`;
+          }
+          resultDiv.innerText = message;
+        } else if (data.message) {
+          // Success path
+          let message = data.message;
+          if (data.txHash) {
+            message += `\nTransaction Hash: ${data.txHash}`;
+          }
+          resultDiv.innerText = message;
+        } else {
+          // Fallback if we get an unexpected format
+          resultDiv.innerText = JSON.stringify(data);
+        }
       } catch (err) {
-        resultDiv.innerText = "An error occurred";
+        resultDiv.innerText = "An error occurred: " + err.message;
       }
     });
   </script>
