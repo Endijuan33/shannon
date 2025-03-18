@@ -18,6 +18,7 @@
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      position: relative;
     }
     h1 {
       text-align: center;
@@ -26,6 +27,19 @@
     p {
       text-align: center;
       color: #666;
+    }
+    .balance-container {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: #007bff;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    form {
+      margin-top: 60px; /* Give some space for the balance display */
     }
     input[type="text"] {
       width: 100%;
@@ -115,6 +129,9 @@
 </head>
 <body>
   <div class="container">
+    <!-- Faucet Balance displayed at top left -->
+    <div class="balance-container" id="faucetBalance">Loading...</div>
+    
     <h1>Somnia Testnet Faucet</h1>
     <p>Enter your wallet address below, complete the captcha challenge, and claim 0.25 STT.</p>
     <form id="claimForm">
@@ -136,10 +153,10 @@
       </p>
       <p>If you wish to donate or return tokens, please use the above address.</p>
     </div>
-
+    
     <!-- Credits section -->
     <div class="credits">
-      <p>Built with love for Somnia Network</p>
+      <p>Built with love❤️ for Somnia Network</p>
       <div class="social">
         <a href="https://github.com/Endijuan33" target="_blank">
           <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub">
@@ -166,6 +183,23 @@
       }
     }
 
+    async function updateFaucetBalance() {
+      try {
+        const res = await fetch("/balance");
+        const data = await res.json();
+        if (data.balance !== undefined) {
+          document.getElementById("faucetBalance").innerText = "Faucet Balance: " + data.balance + " STT";
+        } else {
+          document.getElementById("faucetBalance").innerText = "Failed to load balance.";
+        }
+      } catch (err) {
+        document.getElementById("faucetBalance").innerText = "Error: " + err.message;
+      }
+    }
+
+    // Update balance when page loads
+    updateFaucetBalance();
+
     document.getElementById("claimForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const address = document.getElementById("address").value;
@@ -182,21 +216,15 @@
         const data = await res.json();
 
         if (data.error) {
-          // Show error message (and optionally details if present)
           let message = `Error: ${data.error}`;
-          if (data.details) {
-            message += `\nDetails: ${data.details}`;
-          }
+          if (data.details) { message += `\nDetails: ${data.details}`; }
           resultDiv.innerText = message;
         } else if (data.message) {
-          // Success path
           let message = data.message;
-          if (data.txHash) {
-            message += `\nTransaction Hash: ${data.txHash}`;
-          }
+          if (data.txHash) { message += `\nTransaction Hash: ${data.txHash}`; }
           resultDiv.innerText = message;
+          updateFaucetBalance();
         } else {
-          // Fallback if we get an unexpected format
           resultDiv.innerText = JSON.stringify(data);
         }
       } catch (err) {
