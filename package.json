@@ -1,0 +1,13 @@
+{
+  "name": "somnia-faucet",
+  "version": "1.0.0",
+  "description": "Somnia Testnet Faucet for native STT tokens",
+  "main": "index.js",
+  "scripts": {
+    "start": "netlify dev",
+    "build": "echo 'No build step required'"
+  },
+  "dependencies": {
+    "ethers": "^5.7.0"
+  }
+}
