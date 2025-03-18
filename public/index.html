@@ -185,7 +185,8 @@
 
     async function updateFaucetBalance() {
       try {
-        const res = await fetch("/balance");
+        // Call the Netlify function "balance" endpoint
+        const res = await fetch("/.netlify/functions/balance");
         const contentType = res.headers.get("content-type") || "";
         let data;
         if (contentType.includes("application/json")) {
@@ -204,7 +205,6 @@
       }
     }
 
-    // Update balance when page loads
     updateFaucetBalance();
 
     document.getElementById("claimForm").addEventListener("submit", async (e) => {
