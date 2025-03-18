@@ -1,4 +1,5 @@
 const { ethers } = require("ethers");
+const { MongoClient } = require("mongodb");
 
 const NETWORKS = [
   { name: 'Ethereum', rpc: process.env.ETH_RPC_URL },
@@ -6,10 +7,41 @@ const NETWORKS = [
   { name: 'Polygon', rpc: process.env.POLYGON_RPC_URL },
   { name: 'Arbitrum', rpc: process.env.ARBITRUM_RPC_URL },
   { name: 'Linea', rpc: process.env.LINEA_RPC_URL },
+  { name: 'Optimism', rpc: process.env.OPTIMISM_RPC_URL },
 ];
 
-const walletCooldownData = {};
-const ipCooldownData = {};
+let cachedDb = null;
+async function connectToDatabase() {
+  if (cachedDb) {
+    return cachedDb;
+  }
+  const client = await MongoClient.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+  cachedDb = client.db(process.env.MONGO_DB);
+  return cachedDb;
+}
+
+async function checkCooldown(type, value, now) {
+  const db = await connectToDatabase();
+  const collection = db.collection("claims");
+  const doc = await collection.findOne({ type, value });
+  if (doc && now - doc.lastClaim < 86400) {
+    return doc.lastClaim;
+  }
+  return null;
+}
+
+async function updateCooldown(type, value, now) {
+  const db = await connectToDatabase();
+  const collection = db.collection("claims");
+  await collection.updateOne(
+    { type, value },
+    { $set: { lastClaim: now } },
+    { upsert: true }
+  );
+}
 
 async function verifyCaptcha(captchaToken, remoteIp) {
   const secret = process.env.CF_CAPTCHA_SECRET;
@@ -129,25 +161,28 @@ exports.handler = async (event, context) => {
     };
   }
 
-  if (ipCooldownData[ip]) {
-    return {
-      statusCode: 429,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        error: "Faucet has already been claimed from this IP",
-        details: "Only one claim per IP is allowed."
-      })
-    };
-  }
-
   const now = Math.floor(Date.now() / 1000);
-  if (walletCooldownData[address] && now - walletCooldownData[address] < 86400) {
+
+  const walletLastClaim = await checkCooldown("wallet", address, now);
+  if (walletLastClaim) {
     return {
       statusCode: 429,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         error: "You have already claimed within the last 24 hours",
         details: "Wait until 24 hours pass since your last claim."
+      })
+    };
+  }
+
+  const ipLastClaim = await checkCooldown("ip", ip, now);
+  if (ipLastClaim) {
+    return {
+      statusCode: 429,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        error: "Faucet has already been claimed from this IP",
+        details: "Only one claim per IP is allowed."
       })
     };
   }
@@ -171,15 +206,16 @@ exports.handler = async (event, context) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         error: "Wallet is not active on the required networks",
-        details: "Make at least one transaction on Ethereum, Base, Polygon, Arbitrum, or Linea."
+        details: "Make at least one transaction on Ethereum, Base, Polygon, Arbitrum, Linea or Optimism."
       })
     };
   }
 
   try {
     const txHash = await sendSTT(address);
-    walletCooldownData[address] = now;
-    ipCooldownData[ip] = now;
+    await updateCooldown("wallet", address, now);
+    await updateCooldown("ip", ip, now);
+
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
