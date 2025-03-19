@@ -307,9 +307,7 @@
           resultDiv.innerText = message;
         } else if (data.message) {
           let message = data.message;
-          // Jika ada hash transaksi, bungkus dengan tautan ke explorer
           if (data.txHash) {
-            // Menampilkan hash ringkas, misalnya 6 karakter pertama dan 4 karakter terakhir
             const shortHash = data.txHash.substring(0, 6) + "..." + data.txHash.substring(data.txHash.length - 4);
             message += `<br>Transaction: <a href="https://shannon-explorer.somnia.network/tx/${data.txHash}" target="_blank" rel="noopener noreferrer">${shortHash}</a>`;
           }
