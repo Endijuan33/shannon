@@ -4,111 +4,168 @@
   <meta charset="UTF-8">
   <title>Somnia Testnet Faucet</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary-color: #007bff;
+      --primary-color-dark: #0056b3;
+      --bg-gradient-start: #74ebd5;
+      --bg-gradient-end: #ACB6E5;
+      --text-color: #333;
+      --subtext-color: #666;
+      --container-bg: #fff;
+    }
+    /* Keyframes untuk animasi fade-in */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
       margin: 0;
       padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
-    .container {
+    main.container {
+      background: var(--container-bg);
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
       max-width: 500px;
-      margin: 40px auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      position: relative;
+      width: 100%;
+      animation: fadeIn 0.8s ease-out;
     }
-    h1 {
+    header h1 {
       text-align: center;
-      color: #333;
+      color: var(--text-color);
+      margin-bottom: 10px;
     }
-    p {
+    header p {
       text-align: center;
-      color: #666;
+      color: var(--subtext-color);
+      margin-bottom: 20px;
     }
     .balance-container {
-      background: #007bff;
-      color: white;
-      padding: 5px 10px;
-      border-radius: 4px;
+      background: var(--primary-color);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 5px;
       font-size: 14px;
       display: inline-block;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
     }
     form {
       margin-top: 20px;
     }
+    label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 5px;
+      color: var(--text-color);
+    }
     input[type="text"] {
       width: 100%;
-      padding: 10px;
-      margin: 10px 0;
+      padding: 12px;
+      margin: 10px 0 20px 0;
       border: 1px solid #ccc;
-      border-radius: 4px;
+      border-radius: 5px;
       box-sizing: border-box;
+      transition: border-color 0.3s;
+      font-size: 16px;
+    }
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary-color);
     }
     button {
       width: 100%;
-      padding: 10px;
-      background: #007bff;
+      padding: 12px;
+      background: var(--primary-color);
       border: none;
-      color: white;
+      color: #fff;
       font-size: 16px;
-      border-radius: 4px;
+      font-weight: 600;
+      border-radius: 5px;
       cursor: pointer;
+      transition: background 0.3s, transform 0.1s;
     }
     button:hover {
-      background: #0056b3;
+      background: var(--primary-color-dark);
+    }
+    button:active {
+      transform: scale(0.98);
     }
     #result {
       margin-top: 20px;
       text-align: center;
-      font-weight: bold;
+      font-weight: 600;
+      color: var(--text-color);
+      white-space: pre-wrap;
+      animation: fadeIn 0.5s ease-out;
     }
-    .info {
+    aside.info {
       margin-top: 30px;
-      padding: 15px;
-      background: #e9ecef;
-      border-left: 4px solid #007bff;
+      padding: 20px;
+      background: #f9f9f9;
+      border-left: 4px solid var(--primary-color);
       font-size: 14px;
-      color: #333;
+      color: var(--text-color);
+      border-radius: 5px;
+      animation: fadeIn 1s ease-out;
     }
     .donation {
       margin-top: 10px;
-      font-weight: bold;
+      font-weight: 600;
       display: flex;
       justify-content: space-between;
       align-items: center;
       background: #fff;
       padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
     }
     .donation span {
       word-break: break-all;
+      font-size: 14px;
+      color: #555;
     }
     .copy-btn {
-      background: #007bff;
+      background: var(--primary-color);
       border: none;
       color: white;
       padding: 5px 10px;
-      border-radius: 4px;
+      border-radius: 5px;
       cursor: pointer;
+      font-size: 14px;
+      transition: background 0.3s;
     }
     .copy-btn:hover {
-      background: #0056b3;
+      background: var(--primary-color-dark);
     }
-    .credits {
+    footer.credits {
       margin-top: 30px;
-      padding: 15px;
+      padding: 20px;
       text-align: center;
       font-size: 14px;
-      color: #333;
-      border-top: 1px solid #ccc;
+      color: var(--text-color);
+      border-top: 1px solid #ddd;
+      background: #f9f9f9;
+      border-radius: 5px;
+      animation: fadeIn 1.2s ease-out;
     }
-    .credits p {
+    footer.credits p {
       margin: 10px 0;
+    }
+    footer.credits hr {
+      width: 50%;
+      margin: 10px auto;
+      border: 0;
+      border-top: 1px solid #ddd;
     }
     .social {
       display: flex;
@@ -121,57 +178,74 @@
     .social img {
       width: 32px;
       height: 32px;
+      transition: transform 0.3s;
+    }
+    .social img:hover {
+      transform: scale(1.1);
+    }
+    /* Media queries untuk layar kecil */
+    @media (max-width: 480px) {
+      main.container {
+        padding: 20px;
+      }
+      input[type="text"],
+      button {
+        font-size: 14px;
+      }
     }
   </style>
-  <!-- Load Cloudflare Turnstile script -->
+  <!-- Cloudflare Turnstile Script -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
-  <div class="container">
-    <h1>Somnia Testnet Faucet</h1>
-    <p>Enter your wallet address below, complete the captcha challenge, and claim 0.25 STT.</p>
-
-    <!-- Faucet balance displayed above the address input -->
-    <form id="claimForm">
-      <div class="balance-container" id="faucetBalance">Loading...</div>
-
-      <input type="text" id="address" placeholder="Enter your wallet address" required>
-      <div class="cf-turnstile" data-sitekey="0x4AAAAAABBZjg3H815GxZJT" data-callback="onCaptchaCompleted"></div>
-      <input type="hidden" id="captchaToken" name="captchaToken">
-      <button type="submit">Claim 0.25 STT</button>
-    </form>
-
-    <div id="result"></div>
-
-    <!-- Informational section -->
-    <div class="info">
+  <main class="container">
+    <header>
+      <h1>Somnia Testnet Faucet</h1>
+      <p>Enter your wallet address below, complete the captcha challenge, and claim 0.25 STT.</p>
+    </header>
+    
+    <section>
+      <form id="claimForm">
+        <div class="balance-container" id="faucetBalance">Loading...</div>
+        <label for="address">Wallet Address</label>
+        <input type="text" id="address" placeholder="Enter your wallet address" required aria-label="Wallet Address">
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAABBZjg3H815GxZJT" data-callback="onCaptchaCompleted"></div>
+        <input type="hidden" id="captchaToken" name="captchaToken">
+        <button type="submit">Claim 0.25 STT</button>
+      </form>
+      
+      <div id="result"></div>
+    </section>
+    
+    <aside class="info">
       <p><strong>Disclaimer:</strong> This faucet is for testing purposes only. The tokens provided here have no real monetary value.</p>
-      <p class="donation">
+      <div class="donation">
         <span id="donationAddress">0x7017Ca7EcA89dA93eb2D191Ee3996Bec3cB1c1f6</span>
         <button class="copy-btn" onclick="copyDonationAddress()">Copy</button>
-      </p>
+      </div>
       <p>If you wish to donate or return tokens, please use the above address.</p>
-    </div>
-
-    <!-- Credits section -->
-    <div class="credits">
-      <p>Built with love❤️ for Somnia Network.</p>
+    </aside>
+    
+    <footer class="credits">
+      <p>Built with love ❤️ for Somnia Network.</p>
+      <hr>
+      <p>Designed by <strong>Endcore</strong></p>
       <div class="social">
-        <a href="https://github.com/Endijuan33" target="_blank">
+        <a href="https://github.com/Endcore" target="_blank" aria-label="GitHub">
           <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub">
         </a>
-        <a href="https://t.me/e0303" target="_blank">
+        <a href="https://t.me/Endcore" target="_blank" aria-label="Telegram">
           <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram">
         </a>
       </div>
-    </div>
-  </div>
-
+    </footer>
+  </main>
+  
   <script>
     function onCaptchaCompleted(token) {
       document.getElementById("captchaToken").value = token;
     }
-
+    
     async function copyDonationAddress() {
       const address = document.getElementById("donationAddress").innerText;
       try {
@@ -181,7 +255,7 @@
         alert("Failed to copy donation address.");
       }
     }
-
+    
     async function updateFaucetBalance() {
       try {
         const res = await fetch("/.netlify/functions/balance");
@@ -202,18 +276,17 @@
         document.getElementById("faucetBalance").innerText = "Error: " + err.message;
       }
     }
-
+    
     updateFaucetBalance();
-
+    
     document.getElementById("claimForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const address = document.getElementById("address").value;
       const captchaToken = document.getElementById("captchaToken").value;
       const resultDiv = document.getElementById("result");
       resultDiv.innerText = "Processing claim...";
-
+    
       try {
-        // Call the Netlify function "faucet"
         const res = await fetch("/.netlify/functions/faucet", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -227,15 +300,20 @@
           const text = await res.text();
           throw new Error("Unexpected response format: " + text);
         }
-
+    
         if (data.error) {
           let message = `Error: ${data.error}`;
           if (data.details) { message += `\nDetails: ${data.details}`; }
           resultDiv.innerText = message;
         } else if (data.message) {
           let message = data.message;
-          if (data.txHash) { message += `\nTransaction Hash: ${data.txHash}`; }
-          resultDiv.innerText = message;
+          // Jika ada hash transaksi, bungkus dengan tautan ke explorer
+          if (data.txHash) {
+            // Menampilkan hash ringkas, misalnya 6 karakter pertama dan 4 karakter terakhir
+            const shortHash = data.txHash.substring(0, 6) + "..." + data.txHash.substring(data.txHash.length - 4);
+            message += `<br>Transaction: <a href="https://shannon-explorer.somnia.network/tx/${data.txHash}" target="_blank" rel="noopener noreferrer">${shortHash}</a>`;
+          }
+          resultDiv.innerHTML = message;
           updateFaucetBalance();
         } else {
           resultDiv.innerText = JSON.stringify(data);
