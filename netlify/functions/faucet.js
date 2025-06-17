@@ -220,7 +220,7 @@ exports.handler = async (event, context) => {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        message: "Claim successful. 0.25 STT has been sent.",
+        message: "Claim successful. 0.1 STT has been sent.",
         txHash: txHash
       })
     };
