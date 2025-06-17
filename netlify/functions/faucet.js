@@ -82,7 +82,7 @@ async function isActiveAddress(address) {
 async function sendSTT(toAddress) {
   const provider = new ethers.providers.JsonRpcProvider(process.env.SOMNIA_TESTNET_RPC_URL);
   const wallet = new ethers.Wallet(process.env.FAUCET_PRIVATE_KEY, provider);
-  const amount = ethers.utils.parseUnits("0.25", 18);
+  const amount = ethers.utils.parseUnits("0.1", 18);
   const tx = await wallet.sendTransaction({
     to: toAddress,
     value: amount
